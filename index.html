@@ -12,7 +12,7 @@
         padding: 0;
         background: #000000 url(./loading.gif) center center no-repeat;
         color: #ffffff;
-        font-family: sans-serif;
+        font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
         font-size: 13px;
         line-height: 20px;
       }
@@ -31,10 +31,7 @@
       }
 
       #title {
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 3px;
-        font: 20px Georgia;
-        padding: 10px;
+        padding-left: 10px;
       }
 
       #currentInfo {
@@ -77,8 +74,8 @@
 
 #container {
   width: 100%;
-  height: calc(100vh - 100px);
-  margin-top: 100px;
+  height: calc(100vh - 120px);
+  margin-top: 120px;
 }
 
 #header{
@@ -89,15 +86,16 @@
 
 #header-wrap{
   position: relative;
-  height: 100px;
+  height: 120px;
   width: 100%;
+  text-align:center;
 }
 
 #play{
   cursor: pointer;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    padding: 10px;
+    padding: 8px;
     background-color: white;
     border-radius: 5px;
     display: inline-block;
@@ -111,18 +109,15 @@
 
   <header id="header">
     <div id="header-wrap">
-        <div id="title">
-            Correlation between events and flights prices
-          </div>
+      <h1 id="title">
+          Correlation between events and flights requests
+      </h1>
   
-          <div id="play" onclick="play()">
-            PLAY
-          </div>
-          <!--<div id="currentInfo">
-              <span id="year1990" class="year">1990</span>
-              <span id="year1995" class="year">1995</span>
-              <span id="year2000" class="year">2000</span>
-            </div> -->
+      <div id="play" onclick="play()">
+        PLAY
+      </div>
+
+      <div id="date"></div>
     </div>
   </header>
 
@@ -138,7 +133,8 @@
       Detector.addGetWebGLMessage();
     } else {
 
-      var years = ['1990','1995','2000'];
+      // var years = ['1990','1995','2000'];
+      var years = 90
       var container = document.getElementById('container');
       var globe = new DAT.Globe(container);
 
@@ -147,13 +143,22 @@
       
       var settime = function(globe, t) {
         return function() {
-          new TWEEN.Tween(globe).to({time: t/years.length},2000).easing(TWEEN.Easing.Cubic.EaseOut).start();
+
+          var date = document.getElementById("date");
+
+date.innerHTML = "";
+          new TWEEN.Tween(globe).to({time: t/years},1000).easing(TWEEN.Easing.Cubic.EaseOut).start();
         };
       };
 
       var playtime = function(globe, t) {
         return function() {
-          new TWEEN.Tween(globe).to({time: t/years.length},2000).easing(TWEEN.Easing.Linear.EaseNone).start();
+          var currentDate = window.parsedData[t];
+          var date = document.getElementById("date");
+
+          date.innerHTML = currentDate[0];
+
+          new TWEEN.Tween(globe).to({time: t/years},1000).easing(TWEEN.Easing.Linear.EaseNone).start();
         };
       };
 
@@ -166,12 +171,12 @@
               ++timeIndex;
               playtime(globe, timeIndex)();
 
-              if(timeIndex === years.length){
+              if(timeIndex === years){
                 clearInterval(playInterval);
 
-                setTimeout(function(){settime(globe, 0)()}, 3000);
+                setTimeout(function(){settime(globe, 0)()}, 2000);
               }
-            }, 2000);
+            }, 1000);
       }
       
       // for(var i = 0; i<years.length; i++) {
@@ -184,14 +189,40 @@
       
       
       xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://storage.googleapis.com/data-globe/population909500.json', true);
+      xhr.open('GET', 'https://storage.googleapis.com/data-globe/travelhacks.json', true);
       xhr.onreadystatechange = function(e) {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             var data = JSON.parse(xhr.responseText);
+
+//             [
+//     [
+//         'DATE', 
+//         [ latitude, longitude, magnitude, latitude, longitude, magnitude, ... ]
+//     ],
+//     [
+//         'DATE', 
+//         [ latitude, longitude, magnitude, latitude, longitude, magnitude, ... ]
+//     ]
+// ];
+// destination_latitude: "39.17539978"
+// destination_longitude: "-76.66829681"
+// received_date: "2018-09-01"
+// requests: "1896"
+            
             window.data = data;
+
+            var parsed = [];
+
             for (i=0;i<data.length;i++) {
-              globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: true});
+              parsed.push([data[i].received_date, [data[i].destination_latitude, data[i].destination_longitude, (data[i].requests / 10000)]])
+            }
+
+            window.parsedData = parsed;
+
+
+            for (i=0;i<parsed.length;i++) {
+              globe.addData(parsed[i][1], {format: 'magnitude', name: parsed[i][0], animated: true});
             }
             globe.createPoints();
             settime(globe,0)();
@@ -203,6 +234,29 @@
         }
       };
       xhr.send(null);
+
+
+           
+      // xhr = new XMLHttpRequest();
+      // xhr.open('GET', 'https://storage.googleapis.com/data-globe/population909500.json', true);
+      // xhr.onreadystatechange = function(e) {
+      //   if (xhr.readyState === 4) {
+      //     if (xhr.status === 200) {
+      //       var data = JSON.parse(xhr.responseText);
+      //       window.data = data;
+      //       for (i=0;i<data.length;i++) {
+      //         globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: true});
+      //       }
+      //       globe.createPoints();
+      //       settime(globe,0)();
+      //       globe.animate();
+      //       document.body.style.backgroundImage = 'none'; // remove loading
+
+            
+      //     }
+      //   }
+      // };
+      // xhr.send(null);
     }
 
   </script>
