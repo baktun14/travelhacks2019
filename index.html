@@ -103,19 +103,32 @@
     color: black;
 }
 
+.title {
+  display: flex; align-items: center; justify-content: space-around;
+}
+
+#date{
+  font-size: 40px;
+  font-weight: bold;
+}
+
     </style>
   </head>
   <body>
 
   <header id="header">
     <div id="header-wrap">
-      <h1 id="title">
-          Correlation between events and flights requests
-      </h1>
-  
-      <div id="play" onclick="play()">
-        PLAY
-      </div>
+        <div class="title">
+            <h1 id="title">
+                Correlation between events and flights requests
+              </h1>
+          
+              <div id="play" onclick="play()">
+                PLAY
+              </div>
+
+        </div>
+          
 
       <div id="date"></div>
     </div>
