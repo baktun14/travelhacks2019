@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
   <head>
-    <title>WebGL Globe</title>
+    <title>Travel Hacks 2019</title>
     <meta charset="utf-8">
     <style type="text/css">
       html {
@@ -15,31 +15,6 @@
         font-family: sans-serif;
         font-size: 13px;
         line-height: 20px;
-        height: 100%;
-      }
-
-      #info {
-
-        font-size: 11px;
-        position: absolute;
-        bottom: 5px;
-        background-color: rgba(0,0,0,0.8);
-        border-radius: 3px;
-        right: 10px;
-        padding: 10px;
-
-      }
-
-      #currentInfo {
-        width: 270px;
-        position: absolute;
-        left: 20px;
-        top: 63px;
-
-        background-color: rgba(0,0,0,0.2);
-
-        border-top: 1px solid rgba(255,255,255,0.4);
-        padding: 10px;
       }
 
       a {
@@ -56,13 +31,15 @@
       }
 
       #title {
-        position: absolute;
-        top: 20px;
-        width: 270px;
-        left: 20px;
         background-color: rgba(0,0,0,0.2);
         border-radius: 3px;
         font: 20px Georgia;
+        padding: 10px;
+      }
+
+      #currentInfo {
+        background-color: rgba(0,0,0,0.2);
+        border-top: 1px solid rgba(255,255,255,0.4);
         padding: 10px;
       }
 
@@ -98,30 +75,58 @@
         background: url(./ce.png);
       }
 
+#container {
+  width: 100%;
+  height: calc(100vh - 100px);
+  margin-top: 100px;
+}
+
+#header{
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+#header-wrap{
+  position: relative;
+  height: 100px;
+  width: 100%;
+}
+
+#play{
+  cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    display: inline-block;
+    margin-left: 10px;
+    color: black;
+}
 
     </style>
   </head>
   <body>
 
+  <header id="header">
+    <div id="header-wrap">
+        <div id="title">
+            Correlation between events and flights prices
+          </div>
+  
+          <div id="play" onclick="play()">
+            PLAY
+          </div>
+          <!--<div id="currentInfo">
+              <span id="year1990" class="year">1990</span>
+              <span id="year1995" class="year">1995</span>
+              <span id="year2000" class="year">2000</span>
+            </div> -->
+    </div>
+  </header>
+
   <div id="container"></div>
-
-  <div id="info">
-    <strong><a href="http://www.chromeexperiments.com/globe">WebGL Globe</a></strong> <span class="bull">&bull;</span> Created by the Google Data Arts Team <span class="bull">&bull;</span> Data acquired from <a href="http://sedac.ciesin.columbia.edu/gpw/">SEDAC</a>
-  </div>
-
-  <div id="currentInfo">
-    <span id="year1990" class="year">1990</span>
-    <span id="year1995" class="year">1995</span>
-    <span id="year2000" class="year">2000</span>
-  </div>
-
-  <div id="title">
-    World Population
-  </div>
-
-  <a id="ce" href="http://www.chromeexperiments.com/globe">
-    <span>This is a Chrome Experiment</span>
-  </a>
 
   <script type="text/javascript" src="./third-party/Detector.js"></script>
   <script type="text/javascript" src="./third-party/three.min.js"></script>
@@ -138,27 +143,41 @@
       var globe = new DAT.Globe(container);
 
       console.log(globe);
-      var i, tweens = [];
+      var i, tweens = [], playInterval;
       
       var settime = function(globe, t) {
         return function() {
-          new TWEEN.Tween(globe).to({time: t/years.length},500).easing(TWEEN.Easing.Cubic.EaseOut).start();
-          var y = document.getElementById('year'+years[t]);
-          if (y.getAttribute('class') === 'year active') {
-            return;
-          }
-          var yy = document.getElementsByClassName('year');
-          for(i=0; i<yy.length; i++) {
-            yy[i].setAttribute('class','year');
-          }
-          y.setAttribute('class', 'year active');
+          new TWEEN.Tween(globe).to({time: t/years.length},2000).easing(TWEEN.Easing.Cubic.EaseOut).start();
         };
       };
-      
-      for(var i = 0; i<years.length; i++) {
-        var y = document.getElementById('year'+years[i]);
-        y.addEventListener('mouseover', settime(globe,i), false);
+
+      var playtime = function(globe, t) {
+        return function() {
+          new TWEEN.Tween(globe).to({time: t/years.length},2000).easing(TWEEN.Easing.Linear.EaseNone).start();
+        };
+      };
+
+      var play = function(){
+        var timeIndex = 1;
+        
+        playtime(globe, timeIndex)();
+
+        playInterval = setInterval(function() {
+              ++timeIndex;
+              playtime(globe, timeIndex)();
+
+              if(timeIndex === years.length){
+                clearInterval(playInterval);
+
+                setTimeout(function(){settime(globe, 0)()}, 3000);
+              }
+            }, 2000);
       }
+      
+      // for(var i = 0; i<years.length; i++) {
+      //   var y = document.getElementById('year'+years[i]);
+      //   y.addEventListener('mouseover', settime(globe,i), false);
+      // }
       
       var xhr;
       TWEEN.start();
@@ -178,6 +197,8 @@
             settime(globe,0)();
             globe.animate();
             document.body.style.backgroundImage = 'none'; // remove loading
+
+            
           }
         }
       };
