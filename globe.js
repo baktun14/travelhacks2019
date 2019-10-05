@@ -346,6 +346,25 @@ DAT.Globe = function(container, opts) {
     distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
   }
 
+  // function moveTo(long, lat){
+  //   var phi = (90 - lat) * Math.PI / 180;
+  //   var theta = (180 - long) * Math.PI / 180;
+
+  //   target.x = 200 * Math.sin(phi) * Math.cos(theta);
+  //   target.y = 200 * Math.cos(phi);
+
+
+
+
+    // var zoomDamp = distance/1000;
+
+    // target.x = targetOnDown.x + (x - mouseOnDown.x) * 0.005 * zoomDamp;
+    // target.y = targetOnDown.y + (y - mouseOnDown.y) * 0.005 * zoomDamp;
+
+    // target.y = target.y > PI_HALF ? PI_HALF : target.y;
+    // target.y = target.y < - PI_HALF ? - PI_HALF : target.y;
+  // }
+
   function animate() {
     requestAnimationFrame(animate);
     render();
@@ -403,6 +422,8 @@ DAT.Globe = function(container, opts) {
   this.createPoints = createPoints;
   this.renderer = renderer;
   this.scene = scene;
+  this.zoom = zoom;
+  // this.moveTo = moveTo;
 
   return this;
 
